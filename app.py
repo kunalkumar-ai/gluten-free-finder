@@ -32,7 +32,7 @@ def get_restaurants():
         
         # Define the prompt
         prompt = f"""
-        Find me 5 dedicated gluten-free restaurants and cafes in {city}.
+        Find me 10 dedicated gluten-free restaurants and cafes in {city}.
         Return the restaurants' names, addresses, and contact details, type of cusine.
         Present the results as a Markdown table with columns: "Restaurant Name", "Address", "Contact Details", "Type of Cusine", and "Dedicated Gluten-Free or Separate Menu".
         Ensure each row of the table contains information for a specific restaurant. Do not use bold formatting.
