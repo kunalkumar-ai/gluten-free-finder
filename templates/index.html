@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gluten-Free Restaurant Finder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        #restaurants {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            margin: 20px 0;
+        }
+        .error {
+            color: #ff4444;
+            text-align: center;
+            margin: 20px 0;
+        }
+        #refresh-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #refresh-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gluten-Free Restaurant Finder</h1>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <input type="text" id="city-search" placeholder="Enter city name" style="padding: 10px; width: 300px; border-radius: 4px; border: 1px solid #ddd;">
+        <button onclick="searchRestaurants()" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+            Search
+        </button>
+    </div>
+    <div id="restaurants" class="loading">
+        Enter a city name to find gluten-free restaurants
+    </div>
+    <script>
+        async function searchRestaurants() {
+            const city = document.getElementById('city-search').value.trim();
+            if (!city) {
+                alert('Please enter a city name');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/get-restaurants?city=${encodeURIComponent(city)}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('restaurants').innerHTML = 
+                        '<div class="error">Error: ' + data.error + '</div>';
+                    return;
+                }
+
+                // Convert markdown table to HTML
+                const markdown = data.content;
+                const lines = markdown.split('\n');
+                let html = '<table style="width:100%; border-collapse: collapse; margin: 20px 0;">';
+                
+                let isHeader = true;
+                lines.forEach(line => {
+                    if (line.trim()) {
+                        const cells = line.split('|').map(cell => cell.trim());
+                        if (cells.length > 1) {
+                            html += '<tr>';
+                            cells.forEach(cell => {
+                                if (isHeader) {
+                                    html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">${cell}</th>`;
+                                } else {
+                                    html += `<td style="border: 1px solid #ddd; padding: 8px;">${cell}</td>`;
+                                }
+                            });
+                            html += '</tr>';
+                            isHeader = false;
+                        }
+                    }
+                });
+                
+                html += '</table>';
+                
+                document.getElementById('restaurants').innerHTML = html;
+            } catch (error) {
+                document.getElementById('restaurants').innerHTML = 
+                    '<div class="error">Failed to load restaurants. Please try again.</div>';
+            }
+        }
+    </script>
+
+</body>
+</html>
