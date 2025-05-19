@@ -30,6 +30,10 @@ def home():
 def news():
     return render_template('news.html')
 
+@app.route('/apps')
+def apps():
+    return render_template('apps.html')
+
 @app.route('/get-news')
 def get_news():
     try:

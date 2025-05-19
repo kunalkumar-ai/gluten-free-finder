@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gluten-Free Apps - The Gluten Free Way</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        .app-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            border-radius: 0 0 15px 15px;
+        }
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .app-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .app-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .app-card:hover {
+            transform: translateY(-5px);
+        }
+        .app-info {
+            margin-top: 1rem;
+        }
+        .app-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            color: #2c3e50;
+        }
+        .app-rating {
+            color: #f1c40f;
+            font-size: 0.9rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .app-description {
+            color: #6c757d;
+            margin: 0 0 1rem 0;
+            font-size: 0.95rem;
+        }
+        .app-platforms {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin: 0 0 1rem 0;
+        }
+        .app-download {
+            background-color: #3498db;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+        .app-download:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <h1>Gluten-Free Apps</h1>
+        <p>Top-rated apps to help you live a gluten-free lifestyle</p>
+    </div>
+
+    <div class="app-container">
+        <div class="app-list">
+            <div class="app-card">
+                <div class="app-name">Find Me Gluten Free</div>
+                <div class="app-rating">⭐ 4.8 (150K+ reviews)</div>
+                <div class="app-description">
+                    Find gluten-free restaurants near you with reviews from the celiac community. 
+                    Browse menus, read detailed reviews, and get directions to restaurants.
+                </div>
+                <div class="app-platforms">iOS, Android</div>
+                <a href="https://apps.apple.com/us/app/find-me-gluten-free/id431006818" class="app-download">Download</a>
+            </div>
+
+            <div class="app-card">
+                <div class="app-name">Gluten-Free Scanner</div>
+                <div class="app-rating">⭐ 4.6 (50K+ reviews)</div>
+                <div class="app-description">
+                    Scan barcodes to check if products are gluten-free. 
+                    Access a database of over 500,000 products and ingredients.
+                </div>
+                <div class="app-platforms">iOS, Android</div>
+                <a href="https://apps.apple.com/us/app/gluten-free-scanner/id123456789" class="app-download">Download</a>
+            </div>
+
+            <div class="app-card">
+                <div class="app-name">mySymptoms Food Diary</div>
+                <div class="app-rating">⭐ 4.5 (30K+ reviews)</div>
+                <div class="app-description">
+                    Track your food intake and symptoms to identify gluten-related issues.
+                    Includes symptom tracking, food logging, and health insights.
+                </div>
+                <div class="app-platforms">iOS, Android</div>
+                <a href="https://apps.apple.com/us/app/mysymptoms-food-diary/id123456789" class="app-download">Download</a>
+            </div>
+
+            <div class="app-card">
+                <div class="app-name">AllergyEats</div>
+                <div class="app-rating">⭐ 4.4 (20K+ reviews)</div>
+                <div class="app-description">
+                    Find restaurants that accommodate food allergies and dietary restrictions.
+                    Includes detailed allergy information and user reviews.
+                </div>
+                <div class="app-platforms">iOS, Android</div>
+                <a href="https://apps.apple.com/us/app/allergyeats/id123456789" class="app-download">Download</a>
+            </div>
+
+            <div class="app-card">
+                <div class="app-name">ShopWell</div>
+                <div class="app-rating">⭐ 4.3 (15K+ reviews)</div>
+                <div class="app-description">
+                    Personalized grocery shopping assistant for people with dietary restrictions.
+                    Scan products to get personalized health insights and recommendations.
+                </div>
+                <div class="app-platforms">iOS, Android</div>
+                <a href="https://apps.apple.com/us/app/shopwell/id123456789" class="app-download">Download</a>
+            </div>
+
+            <div class="app-card">
+                <div class="app-name">Yummly Recipes</div>
+                <div class="app-rating">⭐ 4.2 (10K+ reviews)</div>
+                <div class="app-description">
+                    Find and save gluten-free recipes with detailed nutritional information.
+                    Includes meal planning and grocery list features.
+                </div>
+                <div class="app-platforms">iOS, Android</div>
+                <a href="https://apps.apple.com/us/app/yummly-recipes/id123456789" class="app-download">Download</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
