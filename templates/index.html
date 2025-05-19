@@ -12,6 +12,35 @@
             padding: 20px;
             background-color: #f5f5f5;
         }
+        
+        .main-nav {
+            background-color: #3498db;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .nav-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .nav-item {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-item:hover {
+            background-color: #2980b9;
+        }
+        
+        .nav-item.selected {
+            background-color: #2980b9;
+        }
         .app-header {
             text-align: center;
             margin-bottom: 40px;
@@ -119,6 +148,13 @@
         <h1>The Gluten Free Way</h1>
         <h2>Your Companion for Living Gluten-Free</h2>
     </div>
+
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-item">Home</a>
+            <a href="/news" class="nav-item">Gluten-Free News</a>
+        </div>
+    </nav>
     <div class="search-container">
         <input type="text" id="city" placeholder="Enter city name">
         <div class="type-buttons">
