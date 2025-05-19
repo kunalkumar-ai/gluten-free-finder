@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 import google.generativeai as genai
 import os
 import dotenv
+from prompts import get_restaurants_prompt
 
 dotenv.load_dotenv()
 
@@ -32,13 +33,8 @@ def get_restaurants():
         if not city:
             return jsonify({"error": "Please provide a city name"}), 400
         
-        # Define the prompt
-        prompt = f"""
-        Find me 10 dedicated gluten-free restaurants and cafes in {city}.
-        Return the restaurants' names, addresses, and contact details, type of cusine.
-        Present the results as a Markdown table with columns: "Restaurant Name", "Address", "Contact Details", "Type of Cusine", and "Dedicated Gluten-Free or Separate Menu".
-        Ensure each row of the table contains information for a specific restaurant. Do not use bold formatting.
-        """
+        # Get the prompt from prompts.py
+        prompt = get_restaurants_prompt(city)
         
         response = model.generate_content(prompt)
         return jsonify({"content": response.text})
