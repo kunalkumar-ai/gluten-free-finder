@@ -1,4 +1,4 @@
-def get_restaurants_prompt(city, type_="restaurants"):
+def get_restaurants_prompt(city: str, type_: str = "restaurants") -> str:
     """
     Generate a prompt for finding gluten-free restaurants or cafes in a specific city.
     
@@ -11,22 +11,29 @@ def get_restaurants_prompt(city, type_="restaurants"):
     """
     if type_ == "cafes":
         return f"""
-        Find up to 20 gluten-free cafes and bakeries in {city}.
-        Return only the cafe names as a simple list with numbers, even if fewer than 20 are available.
+        You are only allowed to search for **cafes and bakeries**, not restaurants.
 
-        If no gluten-free cafes are available, then find up to 20 cafes with a gluten-free menu option instead.
-        Again, return only the cafe names as a simple list with numbers, even if fewer than 20 are available.
+        Find up to 20 **gluten-free cafes or bakeries** in {city}.
+        Return **only the names** as a **simple numbered list**, even if fewer than 20 are available.
 
-        Do not include any other information or formatting.
-        """
+    **If no gluten-free cafes or bakeries are available**, then find up to 20 **cafes or bakeries** with a **gluten-free menu option** instead.
+    Again, return **only the names** as a **simple numbered list**, even if fewer than 20 are available.
+
+    **Do not include any restaurant names, labels, descriptions, or additional details.**
+    **Return only the name of the cafe or bakery.**
+    """
     else:
         return f"""
-        Find up to 20  gluten-free restaurants in {city}.
-        Return only the restaurant names as a simple list with numbers, even if fewer than 20 are available.
+        You are only allowed to search for **restaurants**, not cafes or bakeries.
 
-        If no gluten-free restaurants are available, then find up to 20 restaurants with a gluten-free menu option instead.
-        Again, return only the restaurant names as a simple list with numbers, even if fewer than 20 are available.
+        Find up to 20 **gluten-free restaurants** in {city}.
+        Return **only the names** as a **simple numbered list**, even if fewer than 20 are available.
 
-        Do not include any other information or formatting.
-        """
+        **If no gluten-free restaurants are available**, then find up to 20 **restaurants** with a **gluten-free menu option** instead.
+        Again, return **only the names** as a **simple numbered list**, even if fewer than 20 are available.
+
+        **Do not include any cafes, bakeries, labels, descriptions, or additional details.**
+        **Return only the name of the restaurant.**
+    """
+
 
