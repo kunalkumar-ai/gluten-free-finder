@@ -15,7 +15,7 @@ if not api_key:
     raise ValueError("API key not found in environment variables. Make sure to set GEMINI_API_KEY in your .env file")
 
 genai.configure(api_key=api_key)
-generation_config = genai.types.GenerationConfig(temperature=0.4) # Example temperature value
+generation_config = genai.types.GenerationConfig(temperature=0.2) # Example temperature value
 
 #model = genai.GenerativeModel('gemini-2.0-flash')
 model = genai.GenerativeModel(model_name='gemini-2.0-flash',
@@ -33,7 +33,7 @@ def news():
 @app.route('/get-news')
 def get_news():
     try:
-        # Return the news articles from news_data.py
+        # Return the static news articles
         return jsonify({"articles": news_articles})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
