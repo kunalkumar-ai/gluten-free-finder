@@ -7,26 +7,39 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f5f5f5;
         }
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        #restaurants {
+        .search-container {
             background-color: white;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
-        .loading {
-            text-align: center;
+        .search-container input {
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 300px;
+            margin-right: 10px;
+        }
+        .search-container button {
+            padding: 12px 25px;
             color: #666;
             margin: 20px 0;
+        }
+        .restaurant-list {
+            margin-top: 20px;
+        }
+        .restaurant-name {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 18px;
+            color: #333;
         }
         .error {
             color: #ff4444;
@@ -56,8 +69,10 @@
             Search
         </button>
     </div>
-    <div id="restaurants" class="loading">
-        Enter a city name to find gluten-free restaurants
+    <div class="results-container">
+        <div id="restaurants" class="loading">
+            Enter a city name to find gluten-free restaurants
+        </div>
     </div>
     <script>
         async function searchRestaurants() {
@@ -77,33 +92,17 @@
                     return;
                 }
 
-                // Convert markdown table to HTML
-                const markdown = data.content;
-                const lines = markdown.split('\n');
-                let html = '<table style="width:100%; border-collapse: collapse; margin: 20px 0;">';
+                // Display restaurant names in a simple list
+                const names = data.content.split('\n').filter(name => name.trim() !== '');
+                const listHtml = names.map(name => `
+                    <div class="restaurant-name">${name}</div>
+                `).join('');
                 
-                let isHeader = true;
-                lines.forEach(line => {
-                    if (line.trim()) {
-                        const cells = line.split('|').map(cell => cell.trim());
-                        if (cells.length > 1) {
-                            html += '<tr>';
-                            cells.forEach(cell => {
-                                if (isHeader) {
-                                    html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">${cell}</th>`;
-                                } else {
-                                    html += `<td style="border: 1px solid #ddd; padding: 8px;">${cell}</td>`;
-                                }
-                            });
-                            html += '</tr>';
-                            isHeader = false;
-                        }
-                    }
-                });
-                
-                html += '</table>';
-                
-                document.getElementById('restaurants').innerHTML = html;
+                document.getElementById('restaurants').innerHTML = `
+                    <div class="restaurant-list">
+                        ${listHtml}
+                    </div>
+                `;
             } catch (error) {
                 document.getElementById('restaurants').innerHTML = 
                     '<div class="error">Failed to load restaurants. Please try again.</div>';

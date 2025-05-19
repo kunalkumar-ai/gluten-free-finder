@@ -9,16 +9,18 @@ def get_restaurants_prompt(city):
         str: Formatted prompt string
     """
     return f"""
-    Find me up to 10 dedicated gluten-free restaurants and cafés within 5 km of central {city} (100% gluten-free kitchens with no risk of cross-contamination). Also include restaurants that offer a clearly labeled gluten-free menu section.
+    Find up to 20 dedicated gluten-free restaurants and cafes in {city}.
+    Return only the restaurant names as a simple list, even if fewer than 20 are available.
 
-    For each entry, return:
-    - Restaurant Name
-    - Address (including postal code)
-    - Contact Details (phone with +358 country code, email, website URL)
-    - Type of Cuisine
-    - Opening Hours
-    - Average User Rating (e.g. Google or Yelp)
-    - Dedicated Gluten-Free or Separate Menu
+    If no dedicated gluten-free restaurants are available, then find up to 20 restaurants or cafes with a gluten-free menu option instead.
+    Again, return only the restaurant names as a simple list, even if fewer than 20 are available.
 
-    Present the results as a Markdown table with those columns. Sort the table by highest user rating first. Do not use bold formatting.
+    Do not include any other information or formatting.
     """
+
+
+'''
+    Find up to 10 gluten-free restaurants and cafes in {city}.
+    Return only the restaurant names as a simple list, even if fewer than 10 are available.
+    Do not include any other information or formatting.
+'''
