@@ -28,7 +28,9 @@ def home():
 def get_restaurants():
     try:
         # Get city from query parameter
-        city = request.args.get('city', 'Munich')  # Default to Munich if no city specified
+        city = request.args.get('city')
+        if not city:
+            return jsonify({"error": "Please provide a city name"}), 400
         
         # Define the prompt
         prompt = f"""
@@ -44,6 +46,6 @@ def get_restaurants():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5006))
+    port = int(os.environ.get('PORT', 5007))
     debug = os.environ.get('FLASK_DEBUG', 'False') == 'True'
     app.run(host='0.0.0.0', port=port, debug=debug)
