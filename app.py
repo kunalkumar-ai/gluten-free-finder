@@ -3,6 +3,7 @@ import google.generativeai as genai
 import os
 import dotenv
 from prompts import get_restaurants_prompt
+from news_data import news_articles
 
 dotenv.load_dotenv()
 
@@ -32,25 +33,7 @@ def news():
 @app.route('/get-news')
 def get_news():
     try:
-        # This is a placeholder - in a real application you would fetch actual news articles
-        # For now, we'll return some sample data
-        news_articles = [
-            {
-                "title": "New Gluten-Free Bakery Opens in Downtown",
-                "date": "May 19, 2025",
-                "content": "A new dedicated gluten-free bakery has opened its doors in downtown, offering a wide variety of breads, pastries, and custom orders."
-            },
-            {
-                "title": "Gluten-Free Festival Returns This Weekend",
-                "date": "May 18, 2025",
-                "content": "The annual Gluten-Free Festival is back this weekend with over 50 vendors showcasing their gluten-free products and dishes."
-            },
-            {
-                "title": "New Study Shows Benefits of Gluten-Free Diet",
-                "date": "May 17, 2025",
-                "content": "A recent study published in the Journal of Nutrition highlights the health benefits of maintaining a gluten-free diet for those with celiac disease."
-            }
-        ]
+        # Return the news articles from news_data.py
         return jsonify({"articles": news_articles})
     except Exception as e:
         return jsonify({"error": str(e)}), 500

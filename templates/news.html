@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gluten-Free News - The Gluten Free Way</title>
+    <title>Gluten-Free Recipes & Travel - The Gluten Free Way</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -71,7 +71,7 @@
     </div>
 
     <div class="news-container">
-        <h2>Latest Gluten-Free News</h2>
+        <h2>Gluten-Free Recipes & Travel</h2>
         
         <div id="newsArticles">
             <!-- News articles will be loaded here -->
@@ -93,7 +93,7 @@
                     const articleElement = document.createElement('div');
                     articleElement.className = 'news-article';
                     articleElement.innerHTML = `
-                        <h3 class="article-title">${article.title}</h3>
+                        <h3 class="article-title"><a href="${article.url}" target="_blank">${article.title}</a></h3>
                         <p class="article-date">${article.date}</p>
                         <p class="article-content">${article.content}</p>
                     `;
