@@ -30,11 +30,13 @@ def get_restaurants():
     try:
         # Get city from query parameter
         city = request.args.get('city')
+        type_ = request.args.get('type', 'restaurants')  # Default to restaurants if type not specified
+        
         if not city:
             return jsonify({"error": "Please provide a city name"}), 400
         
         # Get the prompt from prompts.py
-        prompt = get_restaurants_prompt(city)
+        prompt = get_restaurants_prompt(city, type_)
         
         response = model.generate_content(prompt)
         return jsonify({"content": response.text})

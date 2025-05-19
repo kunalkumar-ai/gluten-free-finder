@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gluten-Free Restaurant Finder</title>
+    <title>The Gluten Free Way - Your Companion for Living Gluten-Free</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,12 +12,28 @@
             padding: 20px;
             background-color: #f5f5f5;
         }
+        .app-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 36px;
+            color: #2c3e50;
+            margin: 0;
+            padding: 0;
+        }
+        h2 {
+            font-size: 20px;
+            color: #7f8c8d;
+            margin: 10px 0 0 0;
+            font-weight: 400;
+        }
         .search-container {
             background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
         }
         .search-container input {
             padding: 12px 15px;
@@ -30,7 +46,44 @@
         .search-container button {
             padding: 12px 25px;
             color: #666;
-            margin: 20px 0;
+            margin: 10px;
+        }
+        .type-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .type-button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+        .type-button:hover {
+            background-color: #e0e0e0;
+        }
+        .type-button.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .search-button {
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        .search-button:hover {
+            background-color: #45a049;
+        }
+        .type-button.selected:hover {
+            background-color: #45a049;
         }
         .restaurant-list {
             margin-top: 20px;
@@ -62,12 +115,17 @@
     </style>
 </head>
 <body>
-    <h1>Gluten-Free Restaurant Finder</h1>
-    <div style="text-align: center; margin-bottom: 20px;">
-        <input type="text" id="city-search" placeholder="Enter city name" style="padding: 10px; width: 300px; border-radius: 4px; border: 1px solid #ddd;">
-        <button onclick="searchRestaurants()" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
-            Search
-        </button>
+    <div class="app-header">
+        <h1>The Gluten Free Way</h1>
+        <h2>Your Companion for Living Gluten-Free</h2>
+    </div>
+    <div class="search-container">
+        <input type="text" id="city" placeholder="Enter city name">
+        <div class="type-buttons">
+            <button onclick="updateSelectedType('restaurants')" class="type-button selected" data-type="restaurants">Restaurants</button>
+            <button onclick="updateSelectedType('cafes')" class="type-button" data-type="cafes">Cafes</button>
+        </div>
+        <button onclick="searchRestaurants()" class="search-button">Search</button>
     </div>
     <div class="results-container">
         <div id="restaurants" class="loading">
@@ -75,15 +133,29 @@
         </div>
     </div>
     <script>
+        let selectedType = 'restaurants';
+
+        function updateSelectedType(type) {
+            // Update selected button state
+            const buttons = document.querySelectorAll('.type-button');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            const selectedButton = document.querySelector(`.type-button[data-type="${type}"]`);
+            if (selectedButton) {
+                selectedButton.classList.add('selected');
+            }
+            selectedType = type;
+        }
+
         async function searchRestaurants() {
-            const city = document.getElementById('city-search').value.trim();
+            const city = document.getElementById('city').value.trim();
             if (!city) {
                 alert('Please enter a city name');
                 return;
             }
-            
+
             try {
-                const response = await fetch(`/get-restaurants?city=${encodeURIComponent(city)}`);
+                document.getElementById('restaurants').innerHTML = '<div class="loading">Searching...</div>';
+                const response = await fetch(`/get-restaurants?city=${encodeURIComponent(city)}&type=${selectedType}`);
                 const data = await response.json();
                 
                 if (data.error) {
