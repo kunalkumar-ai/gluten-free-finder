@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Scanner - The Gluten Free Way</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .permission-container {
+            display: none;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .permission-container.active {
+            display: block;
+        }
+        .permission-instructions {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #fff3cd;
+            border-radius: 4px;
+            border-left: 4px solid #ffc107;
+        }
+        .scanner-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .scanner-header {
+            margin-bottom: 2rem;
+        }
+        .scanner-header h1 {
+            color: #2c3e50;
+            margin: 0;
+        }
+        .scanner-header p {
+            color: #6c757d;
+        }
+        .scanner-video {
+            width: 100%;
+            max-width: 600px;
+            margin: 2rem auto;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        .result-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            background: white;
+            display: none;
+        }
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .result-status {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        .status-gluten-free {
+            color: #4CAF50;
+        }
+        .status-not-gluten-free {
+            color: #e74c3c;
+        }
+        .product-info {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .suggestion {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .scan-button {
+            background-color: #3498db;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .scan-button:hover {
+            background-color: #2980b9;
+        }
+        .loading {
+            display: none;
+            margin: 1rem 0;
+        }
+        .loading.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="scanner-container">
+        <div class="scanner-header">
+            <h1>Product Scanner</h1>
+            <p>Scan barcodes or QR codes to check if products are gluten-free</p>
+        </div>
+
+        <div class="permission-container" id="permissionContainer">
+            <h3>Camera Access Required</h3>
+            <div class="permission-instructions">
+                <p>1. Click the "Start Scanning" button below</p>
+                <p>2. When prompted, click "Allow" to give camera access</p>
+                <p>3. If you don't see the prompt, try:</p>
+                <ul>
+                    <li>Refreshing the page</li>
+                    <li>Clearing your browser permissions</li>
+                    <li>Using a different browser (Chrome recommended)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="scanner-video">
+            <video id="scanner" autoplay></video>
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <button class="scan-button" onclick="startScan()">Start Scanning</button>
+
+        <div class="result-container" id="result">
+            <div class="result-header">
+                <div class="result-status" id="status"></div>
+            </div>
+            <div class="product-info" id="productInfo"></div>
+            <div class="suggestion" id="suggestion"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest/dist/core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest/dist/browser.min.js"></script>
+    <script>
+        let scanner;
+        let isScanning = false;
+        let permissionContainer = document.getElementById('permissionContainer');
+        let videoElement = document.getElementById('scanner');
+
+        // Check camera permissions
+        async function checkCameraPermissions() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream.getTracks().forEach(track => track.stop());
+                return true;
+            } catch (err) {
+                console.error('Camera permission check failed:', err);
+                return false;
+            }
+        }
+
+        function requestCameraPermissions() {
+            return new Promise((resolve) => {
+                const video = document.createElement('video');
+                video.style.display = 'none';
+                document.body.appendChild(video);
+
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then((stream) => {
+                        video.srcObject = stream;
+                        video.play();
+                        video.srcObject.getTracks().forEach(track => track.stop());
+                        document.body.removeChild(video);
+                        resolve(true);
+                    })
+                    .catch((err) => {
+                        console.error('Camera permission request failed:', err);
+                        document.body.removeChild(video);
+                        resolve(false);
+                    });
+            });
+        }
+
+        function startScan() {
+            if (isScanning) {
+                stopScan();
+                return;
+            }
+
+            const video = document.getElementById('scanner');
+            const resultDiv = document.getElementById('result');
+            const statusDiv = document.getElementById('status');
+            const loadingDiv = document.querySelector('.loading');
+
+            // Show permission container
+            permissionContainer.classList.add('active');
+
+            // Request camera permissions
+            requestCameraPermissions()
+                .then(hasPermission => {
+                    if (!hasPermission) {
+                        alert('Please allow camera access in your browser settings');
+                        return;
+                    }
+
+                    // Start video stream
+                    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                        .then((stream) => {
+                            // Hide permission container since we got access
+                            permissionContainer.classList.remove('active');
+                            video.srcObject = stream;
+                            video.play();
+
+                            // Initialize ZXing scanner
+                            scanner = new ZXing.BrowserMultiFormatReader();
+                            scanner.decodeFromVideoDevice(undefined, video, (result, error) => {
+                                if (error) {
+                                    console.error('Scan error:', error);
+                                    return;
+                                }
+                                if (result) {
+                                    // Stop scanning
+                                    stopScan();
+                                    
+                                    // Show loading
+                                    loadingDiv.classList.add('active');
+                                    
+                                    // Send to API
+                                    fetch('/check-product', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({ barcode: result.getText() })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        loadingDiv.classList.remove('active');
+                                        
+                                        // Update UI with results
+                                        resultDiv.style.display = 'block';
+                                        statusDiv.textContent = data.isGlutenFree ? 'Gluten-Free ✅' : 'Not Gluten-Free ❌';
+                                        statusDiv.className = `result-status ${data.isGlutenFree ? 'status-gluten-free' : 'status-not-gluten-free'}`;
+                                        
+                                        document.getElementById('productInfo').innerHTML = `
+                                            <p><strong>Product:</strong> ${data.productName}</p>
+                                            <p><strong>Barcode:</strong> ${data.barcode}</p>
+                                            <p><strong>Brand:</strong> ${data.brand || 'Unknown'}</p>
+                                        `;
+                                        
+                                        document.getElementById('suggestion').innerHTML = `
+                                            <h3>Suggestion:</h3>
+                                            <p>${data.suggestion}</p>
+                                        `;
+                                    })
+                                    .catch(error => {
+                                        loadingDiv.classList.remove('active');
+                                        alert('Error checking product: ' + error.message);
+                                    });
+                                }
+                            });
+                        })
+                        .catch((error) => {
+                            console.error('Camera access error:', error);
+                            alert('Could not access camera. Please make sure you have granted camera permissions.');
+                            permissionContainer.classList.remove('active');
+                        });
+                })
+                .catch((error) => {
+                    console.error('Permission request error:', error);
+                    alert('Failed to request camera permissions');
+                    permissionContainer.classList.remove('active');
+                });
+
+            isScanning = true;
+            document.querySelector('.scan-button').textContent = 'Stop Scanning';
+        }
+
+        function stopScan() {
+            if (scanner) {
+                scanner.stopContinuousDecode();
+                scanner = null;
+            }
+            
+            const video = document.getElementById('scanner');
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+
+            document.querySelector('.scan-button').textContent = 'Start Scanning';
+            document.getElementById('result').style.display = 'none';
+            isScanning = false;
+        }
+    </script>
+</body>
+</html>

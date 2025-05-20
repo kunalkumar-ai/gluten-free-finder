@@ -34,6 +34,52 @@ def news():
 def apps():
     return render_template('apps.html')
 
+@app.route('/scanner')
+def scanner():
+    return render_template('scanner.html')
+
+@app.route('/check-product', methods=['POST'])
+def check_product():
+    data = request.get_json()
+    barcode = data.get('barcode')
+    
+    # Use Gemini API to check if product is gluten-free
+    try:
+        # Example prompt - you might want to adjust this based on your needs
+        prompt = f"""Given this product barcode: {barcode}
+        1. Is this product gluten-free? Yes/No
+        2. What is the product name?
+        3. What is the brand?
+        4. Provide a suggestion for gluten-free alternatives if not gluten-free.
+        
+        Respond in JSON format:
+        {{
+            "isGlutenFree": boolean,
+            "productName": string,
+            "brand": string,
+            "suggestion": string
+        }}
+        """
+        
+        response = model.generate_content(prompt, generation_config)
+        result = response.text
+        
+        # Parse the JSON response
+        try:
+            result_dict = json.loads(result)
+            return jsonify(result_dict)
+        except json.JSONDecodeError:
+            return jsonify({
+                "isGlutenFree": False,
+                "productName": "Unknown",
+                "brand": "Unknown",
+                "suggestion": "Could not determine if product is gluten-free. Please check the ingredients manually."
+            })
+    except Exception as e:
+        return jsonify({
+            "error": str(e)
+        }), 500
+
 @app.route('/get-news')
 def get_news():
     try:
