@@ -203,7 +203,8 @@
                 }
 
                 // Display restaurant names in a simple list
-                const names = data.content.split('\n').filter(name => name.trim() !== '');
+                const result = data.result || '';
+                const names = result.split('\n').filter(name => name.trim() !== '');
                 const listHtml = names.map(name => `
                     <div class="restaurant-name">${name}</div>
                 `).join('');

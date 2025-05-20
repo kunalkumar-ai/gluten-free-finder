@@ -2,7 +2,7 @@ from flask import Flask, render_template, jsonify, request
 import google.generativeai as genai
 import os
 import dotenv
-from prompts import get_restaurants_prompt
+from colab_implementation import find_gluten_free_restaurants_places_api, get_gemini_description
 from news_data import news_articles
 
 dotenv.load_dotenv()
@@ -97,12 +97,24 @@ def get_restaurants():
         
         if not city:
             return jsonify({"error": "Please provide a city name"}), 400
+            
+        # First try to find dedicated gluten-free restaurants
+        restaurants = find_gluten_free_restaurants_places_api(city, os.getenv('GOOGLE_PLACES_API_KEY'), dedicated_only=True)
         
-        # Get the prompt from prompts.py
-        prompt = get_restaurants_prompt(city, type_)
+        if not restaurants:
+            # If no dedicated restaurants found, try regular gluten-free search
+            restaurants = find_gluten_free_restaurants_places_api(city, os.getenv('GOOGLE_PLACES_API_KEY'), dedicated_only=False)
+            
+        if not restaurants:
+            return jsonify({"result": "No restaurants found matching the criteria"})
+            
+        # Get Gemini's formatted description
+        description = get_gemini_description(restaurants, city, os.getenv('GEMINI_API_KEY'), searched_dedicated=True)
         
-        response = model.generate_content(prompt)
-        return jsonify({"content": response.text})
+        return jsonify({
+            "result": description,
+            "raw_data": restaurants  # Include raw restaurant data for debugging
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
