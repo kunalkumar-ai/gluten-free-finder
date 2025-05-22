@@ -71,16 +71,14 @@
             border-radius: 5px;
             width: 300px;
             margin-right: 10px;
+            margin-bottom: 10px; /* Added for spacing */
         }
-        .search-container button {
-            padding: 12px 25px;
-            color: #666;
-            margin: 10px;
-        }
+        /* Removed .search-container button general style as specific buttons are styled */
         .type-buttons {
             display: flex;
             gap: 10px;
             margin-top: 10px;
+            margin-bottom: 15px; /* Added for spacing */
         }
         .type-button {
             padding: 12px 25px;
@@ -90,6 +88,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             color: #333;
+            font-size: 15px;
         }
         .type-button:hover {
             background-color: #e0e0e0;
@@ -105,42 +104,71 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
+            /* margin-top: 10px; Removed as it's the primary action now */
             transition: background-color 0.3s;
+            font-size: 16px;
         }
         .search-button:hover {
             background-color: #45a049;
         }
         .type-button.selected:hover {
-            background-color: #45a049;
+            background-color: #45a049; /* Keep consistent hover for selected */
+        }
+        .results-container { /* Added for consistency */
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .restaurant-list {
-            margin-top: 20px;
+            margin-top: 0; /* Adjusted */
         }
-        .restaurant-name {
-            padding: 10px;
+        .restaurant-item { /* Changed from restaurant-name for more structure */
+            padding: 12px 10px;
             border-bottom: 1px solid #eee;
-            font-size: 18px;
+            font-size: 16px; /* Slightly reduced for better density if needed */
             color: #333;
+            line-height: 1.6;
+        }
+        .restaurant-item:last-child {
+            border-bottom: none;
         }
         .error {
             color: #ff4444;
             text-align: center;
             margin: 20px 0;
+            font-weight: bold;
         }
-        #refresh-btn {
-            display: none;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #555;
+            font-style: italic;
+        }
+        /* Styles for Gemini's structured output if you parse it */
+        .establishment-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .gf-status {
+            font-style: italic;
+            color: #007bff; /* Blue for status */
+            margin-left: 8px;
+        }
+        .gf-status-dedicated {
+            color: #28a745; /* Green for dedicated */
+            font-weight: bold;
+        }
+        .advisory-note {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fff3cd; /* Light yellow for advisory */
+            border-left: 4px solid #ffeeba;
+            color: #856404;
+            font-size: 0.9em;
             border-radius: 4px;
-            cursor: pointer;
         }
-        #refresh-btn:hover {
-            background-color: #45a049;
-        }
+
     </style>
 </head>
 <body>
@@ -160,21 +188,20 @@
     <div class="search-container">
         <input type="text" id="city" placeholder="Enter city name">
         <div class="type-buttons">
-            <button onclick="updateSelectedType('restaurants')" class="type-button selected" data-type="restaurants">Restaurants</button>
-            <button onclick="updateSelectedType('cafes')" class="type-button" data-type="cafes">Cafes</button>
+            <button onclick="updateSelectedType('restaurants_cafes')" class="type-button selected" data-type="restaurants_cafes">Restaurants & Cafes</button>
+            <button onclick="updateSelectedType('bakeries')" class="type-button" data-type="bakeries">Bakeries</button>
         </div>
-        <button onclick="searchRestaurants()" class="search-button">Search</button>
+        <button onclick="searchEstablishments()" class="search-button">Search</button>
     </div>
     <div class="results-container">
-        <div id="restaurants" class="loading">
-            &nbsp;
+        <div id="results-area" class="loading"> 
+            Enter a city and select a type to search.
         </div>
     </div>
     <script>
-        let selectedType = 'restaurants';
+        let selectedType = 'restaurants_cafes'; // Default selected type
 
         function updateSelectedType(type) {
-            // Update selected button state
             const buttons = document.querySelectorAll('.type-button');
             buttons.forEach(btn => btn.classList.remove('selected'));
             const selectedButton = document.querySelector(`.type-button[data-type="${type}"]`);
@@ -182,42 +209,94 @@
                 selectedButton.classList.add('selected');
             }
             selectedType = type;
+            console.log("Selected type:", selectedType); // For debugging
         }
 
-        async function searchRestaurants() {
+        async function searchEstablishments() { // Renamed function for clarity
             const city = document.getElementById('city').value.trim();
+            const resultsArea = document.getElementById('results-area');
+
             if (!city) {
-                alert('Please enter a city name');
+                // Using a more user-friendly way to show messages instead of alert()
+                resultsArea.innerHTML = '<div class="error">Please enter a city name.</div>';
                 return;
             }
 
+            resultsArea.innerHTML = '<div class="loading">Searching...</div>';
+
             try {
-                document.getElementById('restaurants').innerHTML = '<div class="loading">Searching...</div>';
                 const response = await fetch(`/get-restaurants?city=${encodeURIComponent(city)}&type=${selectedType}`);
                 const data = await response.json();
                 
                 if (data.error) {
-                    document.getElementById('restaurants').innerHTML = 
-                        '<div class="error">Error: ' + data.error + '</div>';
+                    resultsArea.innerHTML = '<div class="error">Error: ' + data.error + '</div>';
                     return;
                 }
 
-                // Display restaurant names in a simple list
-                const names = data.content.split('\n').filter(name => name.trim() !== '');
-                const listHtml = names.map(name => `
-                    <div class="restaurant-name">${name}</div>
-                `).join('');
+                const geminiResultText = data.result || '';
                 
-                document.getElementById('restaurants').innerHTML = `
-                    <div class="restaurant-list">
-                        ${listHtml}
-                    </div>
-                `;
+                if (!geminiResultText || geminiResultText.trim() === "" || geminiResultText.startsWith("No ") && geminiResultText.includes("found matching the criteria")) {
+                     resultsArea.innerHTML = `<div class="error">${geminiResultText || 'No results found or an issue with the response.'}</div>`;
+                     return;
+                }
+
+                // Process Gemini's structured output
+                // The output is expected to be a numbered list and an advisory note
+                const lines = geminiResultText.split('\n').filter(line => line.trim() !== '');
+                let listHtml = '';
+                let advisoryNoteHtml = '';
+
+                lines.forEach(line => {
+                    if (line.toLowerCase().startsWith("reminder:")) {
+                        advisoryNoteHtml += `<div class="advisory-note">${line}</div>`;
+                    } else if (line.match(/^\d+\.\s/)) { // Check if it's a numbered list item
+                        // Basic parsing for now, can be made more robust
+                        let name = line.substring(line.indexOf('.') + 1).trim();
+                        let status = '';
+                        
+                        if (name.includes('[dedicated gluten-free]')) {
+                            status = '<span class="gf-status gf-status-dedicated">[dedicated gluten-free]</span>';
+                            name = name.replace('[dedicated gluten-free]', '').trim();
+                        } else if (name.includes('[offers gluten-free options]')) {
+                            status = '<span class="gf-status">[offers gluten-free options]</span>';
+                            name = name.replace('[offers gluten-free options]', '').trim();
+                        } else if (name.includes('[status unclear, verify with restaurant]')) {
+                            status = '<span class="gf-status">[status unclear, verify with restaurant]</span>';
+                            name = name.replace('[status unclear, verify with restaurant]', '').trim();
+                        }
+                        // Remove review count if present, as per new requirement
+                        name = name.replace(/\[Reviews:.*?\]/g, '').trim();
+
+                        listHtml += `<div class="restaurant-item"><span class="establishment-name">${name}</span> ${status}</div>`;
+                    } else if (line.trim() !== "") { 
+                        // Catch any other non-empty lines that aren't the advisory or list items
+                        // This might be part of a multi-line item if Gemini doesn't strictly follow single lines
+                        // For now, just append them as raw lines if they are not the advisory.
+                         if (!advisoryNoteHtml) listHtml += `<div class="restaurant-item">${line}</div>`;
+                    }
+                });
+                
+                if (listHtml === "" && !advisoryNoteHtml.includes("No ")) { // If no list items were parsed but it's not a "no results" message
+                    resultsArea.innerHTML = `<div class="error">Could not parse the results. Raw output: <pre>${geminiResultText}</pre></div>`;
+                } else {
+                    resultsArea.innerHTML = `
+                        <div class="restaurant-list">
+                            ${listHtml || '<div class="error">No establishments found matching your criteria.</div>'}
+                        </div>
+                        ${advisoryNoteHtml}
+                    `;
+                }
+
             } catch (error) {
-                document.getElementById('restaurants').innerHTML = 
-                    '<div class="error">Failed to load restaurants. Please try again.</div>';
+                console.error("Search error:", error);
+                resultsArea.innerHTML = '<div class="error">Failed to load results. Please check your connection and try again.</div>';
             }
         }
+
+        // Set default message on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('results-area').innerHTML = '<div class="loading">Enter a city and select a type to search.</div>';
+        });
     </script>
 
 </body>
