@@ -38,7 +38,7 @@
             background-color: #2980b9;
         }
         
-        .nav-item.selected { /* This class seems unused for nav items, but keeping it */
+        .nav-item.selected { 
             background-color: #2980b9;
         }
         .app-header {
@@ -114,32 +114,81 @@
         .search-button:hover {
             background-color: #45a049;
         }
-        .type-button.selected:hover { /* To ensure selected button hover is consistent */
+        .type-button.selected:hover { 
             background-color: #45a049; 
         }
         .results-container { 
-            background-color: white;
+            background-color: white; /* Keep white background for the container */
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            /* Removed margin-top from here, will be handled by spacing of elements inside if needed */
         }
-        .establishment-list { 
-            margin-top: 0;
-            padding-left: 0; /* Remove default list padding */
-            list-style-type: none; /* Remove default list bullets */
+
+        /* New Card Styles */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Responsive columns */
+            gap: 20px; /* Space between cards */
+            padding-top: 10px; /* Optional padding above the grid */
         }
-        .establishment-item { 
-            padding: 12px 10px;
-            border-bottom: 1px solid #eee;
-            font-size: 16px; 
-            color: #333;
-            line-height: 1.6;
+
+        .establishment-card {
+            background-color: #ffffff; /* Card background */
+            border: 1px solid #e0e0e0; /* Subtle border for the card */
+            border-radius: 8px;
+            padding: 20px; /* Increased padding for card content */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Slightly more pronounced shadow */
+            display: flex;
+            flex-direction: column; /* Content flows top to bottom */
+            justify-content: space-between; /* If cards have fixed height, to push content */
         }
-        .establishment-item:last-child {
-            border-bottom: none;
+
+        .establishment-card-name {
+            font-size: 1.25em; /* Larger name */
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px; /* Space after name */
         }
+
+        .establishment-card-address {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 8px; /* Space above address */
+            margin-bottom: 0; /* Remove bottom margin if status is last */
+            line-height: 1.4;
+        }
+        
+        /* Styles for GF Status Badges */
+        .gf-status {
+            display: inline-block; /* Behaves like text but can have padding/margin */
+            padding: 5px 10px; /* More padding for badge look */
+            border-radius: 5px; /* More rounded badge */
+            font-size: 0.85em; 
+            font-weight: 500; /* Slightly bolder text on badge */
+            margin-bottom: 10px; /* Space after status badge */
+            text-align: center;
+        }
+
+        .gf-status-dedicated {
+            color: white; 
+            background-color: #28a745; /* Green */
+        }
+        .gf-status-options {
+             color: white; 
+             background-color: #007bff; /* Blue */
+        }
+        .gf-status-unclear {
+            color: white; 
+            background-color: #6c757d; /* Gray */
+        }
+         .gf-status-unknown { /* For fallback or if status is not one of the above */
+            color: #212529; /* Dark text */
+            background-color: #ffc107; /* Warning yellow */
+        }
+
         .error {
-            color: #d9534f; /* Bootstrap's danger color */
+            color: #d9534f; 
             text-align: center;
             margin: 20px 0;
             font-weight: bold;
@@ -148,8 +197,8 @@
             border: 1px solid #ebccd1;
             border-radius: 4px;
         }
-        .info-message { /* New style for informative messages */
-            color: #31708f; /* Bootstrap's info color */
+        .info-message { 
+            color: #31708f; 
             text-align: center;
             margin: 20px 0;
             padding: 10px;
@@ -163,42 +212,13 @@
             color: #555;
             font-style: italic;
         }
-        .establishment-name {
-            font-weight: bold;
-            color: #2c3e50;
-            margin-right: 8px; /* Space between name and status */
-        }
-        .gf-status {
-            font-style: italic;
-            padding: 2px 6px; /* Add some padding to status tags */
-            border-radius: 4px; /* Rounded corners for tags */
-            font-size: 0.9em; /* Slightly smaller font for status */
-            /* margin-left: 8px; /* Removed as name has margin-right now */
-        }
-        .gf-status-dedicated {
-            color: white; 
-            background-color: #28a745; /* Green */
-            font-weight: bold;
-        }
-        .gf-status-options {
-             color: white; 
-             background-color: #007bff; /* Blue */
-        }
-        .gf-status-unclear {
-            color: white; 
-            background-color: #6c757d; /* Gray */
-        }
-         .gf-status-unknown { /* For fallback */
-            color: white;
-            background-color: #f0ad4e; /* Orange/Warning */
-        }
         .advisory-note {
-            margin-top: 25px; /* Increased margin */
-            padding: 15px; /* Increased padding */
-            background-color: #fff3cd; /* Light yellow */
-            border-left: 5px solid #ffeeba; /* Yellow border */
-            color: #856404; /* Dark yellow text */
-            font-size: 0.95em; /* Slightly larger */
+            margin-top: 25px; 
+            padding: 15px; 
+            background-color: #fff3cd; 
+            border-left: 5px solid #ffeeba; 
+            color: #856404; 
+            font-size: 0.95em; 
             border-radius: 4px;
             line-height: 1.5;
         }
@@ -252,7 +272,7 @@
         async function searchEstablishments() { 
             const cityInput = document.getElementById('city');
             const countryInput = document.getElementById('country');
-            const searchButton = document.getElementById('searchButton'); // Get the search button
+            const searchButton = document.getElementById('searchButton');
             const city = cityInput.value.trim();
             const country = countryInput.value.trim();
             const resultsArea = document.getElementById('results-area');
@@ -263,12 +283,10 @@
             }
 
             resultsArea.innerHTML = '<div class="loading">Searching... This may take a moment.</div>';
-            // Disable inputs and button during search
             cityInput.disabled = true;
             countryInput.disabled = true;
             searchButton.disabled = true;
             document.querySelectorAll('.type-button').forEach(btn => btn.disabled = true);
-
 
             try {
                 let fetchURL = `/get-restaurants?city=${encodeURIComponent(city)}&type=${selectedType}`;
@@ -280,58 +298,73 @@
                 const data = await response.json();
                 
                 if (data.error) {
-                    // Display specific errors from backend (like city/country mismatch)
                     resultsArea.innerHTML = `<div class="error">${data.error}</div>`;
                     return;
                 }
 
                 const geminiResultText = data.result || '';
+                const rawData = data.raw_data; // Expect this to be an array of place objects
                 
-                // Handle Gemini's "No [type] found..." message specifically
                 if (geminiResultText.startsWith("No ") && (geminiResultText.includes("found matching your criteria") || geminiResultText.includes("found matching your criteria in"))) {
-                     resultsArea.innerHTML = `<div class="info-message">${geminiResultText}</div>`; // Use info-message style
+                     resultsArea.innerHTML = `<div class="info-message">${geminiResultText}</div>`;
                      return;
                 }
                 if (!geminiResultText || geminiResultText.trim() === "") {
-                     resultsArea.innerHTML = `<div class="info-message">No results found or an issue with the response.</div>`; // Use info-message
+                     resultsArea.innerHTML = `<div class="info-message">No results found or an issue with the response. Please check the console for details.</div>`;
+                     console.warn("Gemini result text was empty or invalid:", geminiResultText)
                      return;
                 }
 
-
                 const lines = geminiResultText.split('\n').filter(line => line.trim() !== '');
-                let listHtml = '';
+                let cardsHtml = '';
                 let foundEstablishments = false;
 
                 lines.forEach(line => {
-                    // Expected format: "1. Establishment Name - [GF Status]"
                     const match = line.match(/^\d+\.\s*(.+?)\s*-\s*(\[.+?\])$/);
                     if (match) {
                         foundEstablishments = true;
                         const namePart = match[1].trim();
-                        const statusPart = match[2].trim(); // e.g., "[Dedicated GF]"
+                        const statusPartOriginal = match[2].trim(); // e.g., "[Dedicated GF]"
 
-                        let statusClass = 'gf-status-unknown'; // Default class
-                        if (statusPart === "[Dedicated GF]") statusClass = 'gf-status-dedicated';
-                        else if (statusPart === "[Offers GF Menu]") statusClass = 'gf-status-options';
-                        else if (statusPart === "[Unclear - Verify Directly]") statusClass = 'gf-status-unclear';
+                        let statusClass = 'gf-status-unknown'; 
+                        let statusText = statusPartOriginal.replace(/\[|\]/g, '').trim(); // Remove brackets
+
+                        if (statusPartOriginal === "[Dedicated GF]") {
+                            statusClass = 'gf-status-dedicated';
+                            statusText = '✓ ' + statusText; // Add checkmark
+                        } else if (statusPartOriginal === "[Offers GF Menu]") {
+                            statusClass = 'gf-status-options';
+                        } else if (statusPartOriginal === "[Unclear - Verify Directly]") {
+                            statusClass = 'gf-status-unclear';
+                        }
                         
-                        listHtml += `<div class="establishment-item">
-                                        <span class="establishment-name">${namePart}</span>
-                                        <span class="gf-status ${statusClass}">${statusPart}</span>
-                                     </div>`;
+                        let address = 'Address not available';
+                        if (rawData && Array.isArray(rawData)) {
+                            const placeNameFromGemini = namePart.trim();
+                            const foundPlace = rawData.find(place => 
+                                place.name && place.name.trim().toLowerCase() === placeNameFromGemini.toLowerCase()
+                            ); // Case-insensitive matching for robustness
+                            if (foundPlace && foundPlace.address) {
+                                address = foundPlace.address;
+                            } else {
+                                console.warn(`Address not found in raw_data for: ${placeNameFromGemini}. Raw data names:`, rawData.map(p => p.name));
+                            }
+                        }
+
+                        cardsHtml += `
+                            <div class="establishment-card">
+                                <h3 class="establishment-card-name">${namePart}</h3>
+                                <span class="gf-status ${statusClass}">${statusText}</span>
+                                <p class="establishment-card-address">${address}</p>
+                            </div>`;
                     } else if (line.trim() !== "" && !line.toLowerCase().startsWith("reminder:")) {
-                        // If a line doesn't match the expected format but isn't empty, display it as is.
-                        // This helps catch unexpected formatting from Gemini.
-                        // listHtml += `<div class="establishment-item">${line}</div>`; 
-                        console.warn("Unparsed line from Gemini:", line); // Log unparsed lines
+                        console.warn("Unparsed line from Gemini:", line);
                     }
                 });
                 
                 if (!foundEstablishments) { 
-                    // If loop finishes and no items were parsed as establishments, but Gemini didn't give a "No results" message.
-                    resultsArea.innerHTML = `<div class="info-message">Could not parse the results. Please try again.</div>`;
+                    resultsArea.innerHTML = `<div class="info-message">Could not parse the results into the expected format. The raw response was: <pre>${geminiResultText}</pre></div>`;
                 } else {
-                    // Add the standard advisory note after the list
                     const advisoryNote = `
                         <div class="advisory-note">
                             <strong>Reminder:</strong> Gluten-free status classifications are AI-assisted suggestions. 
@@ -340,9 +373,9 @@
                             especially if you have celiac disease or severe sensitivities. Information can change.
                         </div>`;
                     resultsArea.innerHTML = `
-                        <ul class="establishment-list">
-                            ${listHtml}
-                        </ul>
+                        <div class="results-grid">
+                            ${cardsHtml}
+                        </div>
                         ${advisoryNote} 
                     `;
                 }
@@ -351,7 +384,6 @@
                 console.error("Search error:", error);
                 resultsArea.innerHTML = '<div class="error">Failed to load results. Please check your connection and try again.</div>';
             } finally {
-                // Re-enable inputs and button after search completes or fails
                 cityInput.disabled = false;
                 countryInput.disabled = false;
                 searchButton.disabled = false;
