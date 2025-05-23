@@ -149,7 +149,7 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
         }
 
-        a.establishment-card.non-clickable { /* Kept in case you want to disable links for cards with no name */
+        a.establishment-card.non-clickable {
             cursor: default; 
         }
         a.establishment-card.non-clickable:hover {
@@ -282,10 +282,10 @@
         }
 
         async function searchEstablishments() { 
-            const cityInput = document.getElementById('city');
+            const cityInput = document.getElementById('city'); // User's input city
             const countryInput = document.getElementById('country');
             const searchButton = document.getElementById('searchButton');
-            const city = cityInput.value.trim();
+            const city = cityInput.value.trim(); // User's input city
             const country = countryInput.value.trim();
             const resultsArea = document.getElementById('results-area');
 
@@ -334,7 +334,7 @@
                     const match = line.match(/^\d+\.\s*(.+?)\s*-\s*(\[.+?\])$/);
                     if (match) {
                         foundEstablishments = true;
-                        const namePart = match[1].trim(); // This is the establishment name
+                        const namePart = match[1].trim();
                         const statusPartOriginal = match[2].trim(); 
 
                         let statusClass = 'gf-status-unknown'; 
@@ -350,7 +350,6 @@
                         }
                         
                         let address = 'Address not available';
-                        // We still find the address from rawData for display purposes
                         if (rawData && Array.isArray(rawData)) {
                             const placeNameFromGemini = namePart.trim();
                             const foundPlace = rawData.find(place => 
@@ -361,11 +360,22 @@
                             }
                         }
                         
-                        // *** Construct Google Search URL using the establishment's name ***
-                        const googleSearchQuery = encodeURIComponent(namePart);
-                        const searchUrl = `http://google.com/search?q=${googleSearchQuery}`;
+                        // *** Construct a more specific Google Search URL ***
+                        let searchQueryComponents = [namePart];
+                        if (address && address !== 'Address not available') {
+                            searchQueryComponents.push(address); // Add the detailed address
+                        } else {
+                            // Fallback: if no specific address, use the city the user searched for
+                            const cityContext = cityInput.value.trim(); // 'city' is defined at the start of this function
+                            if (cityContext) {
+                                searchQueryComponents.push(cityContext);
+                            }
+                        }
+                        const fullSearchQuery = searchQueryComponents.join(' ');
+                        const encodedSearchQuery = encodeURIComponent(fullSearchQuery);
+                        const searchUrl = `http://google.com/search?q=${encodedSearchQuery}`;
                         
-                        // console.log(`For establishment "${namePart}": Constructed Google Search URL: ${searchUrl}`); // For debugging if needed
+                        // console.log(`For "${namePart}": Search Query is "${fullSearchQuery}", URL: ${searchUrl}`);
 
                         cardsHtml += `
                             <a href="${searchUrl}" 
