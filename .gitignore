@@ -4,3 +4,4 @@ __pycache__/
 .env.local
 .env.*.local
 .env.*
+google_places_output.txt
