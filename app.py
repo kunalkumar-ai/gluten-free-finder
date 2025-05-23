@@ -1,5 +1,5 @@
 from flask import Flask, render_template, jsonify, request
-import google.generativeai as genai
+import google.generativeai as genai # Assuming this is how you use the SDK
 import os
 import dotenv
 import json 
@@ -15,8 +15,10 @@ GEMINI_API_KEY_FROM_ENV = os.getenv('GEMINI_API_KEY')
 if not GEMINI_API_KEY_FROM_ENV:
     raise ValueError("GEMINI_API_KEY not found in environment variables.")
 
-genai.configure(api_key=GEMINI_API_KEY_FROM_ENV)
-gemini_model = genai.GenerativeModel(model_name='gemini-2.0-flash')
+# Configure Gemini API (using the SDK method if that's your primary way)
+# If find_places.py makes direct REST calls, this configuration here is for other app parts
+# genai.configure(api_key=GEMINI_API_KEY_FROM_ENV)
+# gemini_model = genai.GenerativeModel(model_name='gemini-1.0-pro-flash') # Or gemini-1.5-flash if SDK supports
 
 GOOGLE_PLACES_API_KEY_FROM_ENV = os.getenv('GOOGLE_PLACES_API_KEY')
 if not GOOGLE_PLACES_API_KEY_FROM_ENV:
@@ -40,7 +42,7 @@ def apps():
 
 @app.route('/scanner')
 def scanner():
-    return render_template('scanner.html')
+    return render_template('scanner.html') 
 
 @app.route('/check-product', methods=['POST'])
 def check_product():
@@ -50,6 +52,19 @@ def check_product():
     barcode = data.get('barcode')
     
     try:
+        # This part uses the Gemini SDK, ensure genai and gemini_model are configured above
+        # For consistency, you might want all Gemini calls (SDK or REST) to use the same model.
+        # This uses an SDK model instance which might be different from find_places.py's REST call.
+        if 'gemini_model' not in globals(): # Basic check if model is initialized
+             genai.configure(api_key=GEMINI_API_KEY_FROM_ENV)
+             # Choose a model consistent with what you expect, e.g., 'gemini-1.5-flash-latest' via SDK
+             # Check SDK documentation for available model names.
+             # Using 'gemini-pro' as a placeholder if specific flash model isn't via this SDK path.
+             current_gemini_model = genai.GenerativeModel(model_name='gemini-pro')
+        else:
+            current_gemini_model = gemini_model
+
+
         current_generation_config = genai.types.GenerationConfig(temperature=0.2) 
         prompt = f"""Given this product barcode: {barcode}
         1. Is this product gluten-free? Yes/No/Cannot Determine
@@ -67,7 +82,7 @@ def check_product():
         If you cannot find information for the barcode, respond with "Cannot Determine" for isGlutenFree and null for other fields.
         """
         
-        response = gemini_model.generate_content(prompt, generation_config=current_generation_config)
+        response = current_gemini_model.generate_content(prompt, generation_config=current_generation_config)
         result_text = response.text
         
         try:
@@ -104,59 +119,64 @@ def get_news_api():
         print(f"Error in /get-news: {e}")
         return jsonify({"error": str(e)}), 500
 
-@app.route('/get-restaurants') # Endpoint name can remain, or be changed to /get-establishments
-def get_restaurants_route():
+@app.route('/get-restaurants')
+def get_establishments_route():
     try:
         city = request.args.get('city')
-        # The 'type_' from frontend will now be 'restaurants_cafes' or 'bakeries'
-        type_ = request.args.get('type', 'restaurants_cafes') # Default to restaurants_cafes
+        type_ = request.args.get('type', 'restaurants') # Default to restaurants
+        # NEW: Get country parameter, default to None if not provided
+        country = request.args.get('country', None) 
         
         if not city:
             return jsonify({"error": "Please provide a city name"}), 400
             
-        print(f"Received request for city: {city}, type: {type_}")
+        print(f"Received request for city: {city}, type: {type_}, country: {country}")
 
         places_list = find_gluten_free_restaurants_places_api(
             city, 
             GOOGLE_PLACES_API_KEY_FROM_ENV,
-            type_=type_ 
+            type_=type_,
+            country_filter=country # MODIFIED: Pass country to the function
         )
         
         if not places_list: 
-            print(f"No establishments found for {type_} in {city} by Google Places API.")
+            # If Google Places API found nothing, Gemini will be called with an empty list
+            # and should return a "No type_ found..." message based on its prompt.
+            print(f"No establishments found for {type_} in {city} (country: {country}) by Google Places API.")
+            # Call Gemini with empty list to get the standard "no results" message
             description = get_gemini_description(
                 [], 
                 city, 
-                GEMINI_API_KEY_FROM_ENV,
+                GEMINI_API_KEY_FROM_ENV, # Use the globally loaded key for find_places.py
                 type_=type_
+                # country_context=country # Optionally pass country to Gemini for context if its prompt uses it
             )
             return jsonify({"result": description, "raw_data": []})
 
-        # REMOVED: Sorting by review count
-        # places_list.sort(key=get_review_count, reverse=True) 
-        # print(f"ℹ️ Places list (not sorted by review count). Top {min(len(places_list), 20)} will be sent to Gemini.")
-        print(f"ℹ️ Found {len(places_list)} places. Up to {min(len(places_list), 20)} will be sent to Gemini as is (order from Places API).")
+        print(f"ℹ️ Found {len(places_list)} unique places from Places API. Sending all to Gemini.")
         
         description = get_gemini_description(
-            places_list, # Pass the unsorted list (or as Google returned it)
+            places_list, 
             city, 
-            GEMINI_API_KEY_FROM_ENV,
+            GEMINI_API_KEY_FROM_ENV, # Use the globally loaded key for find_places.py
             type_=type_
+            # country_context=country # Optionally pass country to Gemini for context if its prompt uses it
         )
         
+        # This fallback logic might need adjustment based on how Gemini's "no results" vs. error messages are structured
         if not description or description.strip() == "" or description.startswith("Error:") or "Gemini API blocked" in description:
             print(f"\n❌ Gemini returned an empty or error description for city: {city}, type: {type_}. Description: '{description}'")
-            fallback_message = f"Could not retrieve a detailed summary for {type_} in {city}. Please try again."
-            if "No " in description and " found matching the criteria" in description:
-                 fallback_message = description
+            fallback_message = f"Could not retrieve a detailed summary for {type_} in {city}."
+            if description and ("No " in description and " found matching" in description): # Check if it's a Gemini "no results"
+                 fallback_message = description # Use Gemini's "no results" message
             return jsonify({"result": fallback_message, "raw_data": places_list if places_list else []})
             
         return jsonify({
             "result": description,
-            "raw_data": places_list # Send the original list from Places API for potential frontend use
+            "raw_data": places_list 
         })
     except Exception as e:
-        print(f"Critical error in /get-restaurants route: {e}")
+        print(f"Critical error in /get-establishments route: {e}")
         traceback.print_exc()
         return jsonify({"error": "An unexpected server error occurred. Please try again later."}), 500
 
