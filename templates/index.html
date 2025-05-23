@@ -38,7 +38,7 @@
             background-color: #2980b9;
         }
         
-        .nav-item.selected {
+        .nav-item.selected { /* This class seems unused for nav items, but keeping it */
             background-color: #2980b9;
         }
         .app-header {
@@ -64,19 +64,18 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-bottom: 40px;
         }
-        .search-inputs { /* New class to group inputs */
+        .search-inputs {
             display: flex;
-            gap: 10px; /* Space between input fields */
+            gap: 10px; 
             margin-bottom: 10px;
-            flex-wrap: wrap; /* Allow inputs to wrap on smaller screens */
+            flex-wrap: wrap; 
         }
         .search-container input {
             padding: 12px 15px;
             font-size: 16px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            /* width: 300px; */ /* Removed fixed width to allow flex behavior */
-            flex-grow: 1; /* Allow inputs to grow */
+            flex-grow: 1; 
         }
         .type-buttons {
             display: flex;
@@ -110,12 +109,12 @@
             cursor: pointer;
             transition: background-color 0.3s;
             font-size: 16px;
-            margin-top: 10px; /* Add some margin if inputs wrap */
+            margin-top: 10px; 
         }
         .search-button:hover {
             background-color: #45a049;
         }
-        .type-button.selected:hover {
+        .type-button.selected:hover { /* To ensure selected button hover is consistent */
             background-color: #45a049; 
         }
         .results-container { 
@@ -126,6 +125,8 @@
         }
         .establishment-list { 
             margin-top: 0;
+            padding-left: 0; /* Remove default list padding */
+            list-style-type: none; /* Remove default list bullets */
         }
         .establishment-item { 
             padding: 12px 10px;
@@ -138,10 +139,23 @@
             border-bottom: none;
         }
         .error {
-            color: #ff4444;
+            color: #d9534f; /* Bootstrap's danger color */
             text-align: center;
             margin: 20px 0;
             font-weight: bold;
+            padding: 10px;
+            background-color: #f2dede;
+            border: 1px solid #ebccd1;
+            border-radius: 4px;
+        }
+        .info-message { /* New style for informative messages */
+            color: #31708f; /* Bootstrap's info color */
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #d9edf7;
+            border: 1px solid #bce8f1;
+            border-radius: 4px;
         }
         .loading {
             text-align: center;
@@ -152,29 +166,41 @@
         .establishment-name {
             font-weight: bold;
             color: #2c3e50;
+            margin-right: 8px; /* Space between name and status */
         }
         .gf-status {
             font-style: italic;
-            margin-left: 8px;
+            padding: 2px 6px; /* Add some padding to status tags */
+            border-radius: 4px; /* Rounded corners for tags */
+            font-size: 0.9em; /* Slightly smaller font for status */
+            /* margin-left: 8px; /* Removed as name has margin-right now */
         }
         .gf-status-dedicated {
-            color: #28a745; 
+            color: white; 
+            background-color: #28a745; /* Green */
             font-weight: bold;
         }
         .gf-status-options {
-             color: #007bff; 
+             color: white; 
+             background-color: #007bff; /* Blue */
         }
         .gf-status-unclear {
-            color: #6c757d; 
+            color: white; 
+            background-color: #6c757d; /* Gray */
+        }
+         .gf-status-unknown { /* For fallback */
+            color: white;
+            background-color: #f0ad4e; /* Orange/Warning */
         }
         .advisory-note {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #fff3cd; 
-            border-left: 4px solid #ffeeba;
-            color: #856404;
-            font-size: 0.9em;
+            margin-top: 25px; /* Increased margin */
+            padding: 15px; /* Increased padding */
+            background-color: #fff3cd; /* Light yellow */
+            border-left: 5px solid #ffeeba; /* Yellow border */
+            color: #856404; /* Dark yellow text */
+            font-size: 0.95em; /* Slightly larger */
             border-radius: 4px;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -195,18 +221,18 @@
     <div class="search-container">
         <div class="search-inputs">
             <input type="text" id="city" placeholder="Enter city name">
-            <input type="text" id="country" placeholder="Country (e.g., Germany, US)">
+            <input type="text" id="country" placeholder="Country (optional)">
         </div>
         <div class="type-buttons">
             <button onclick="updateSelectedType('restaurants')" class="type-button selected" data-type="restaurants">Restaurants</button>
             <button onclick="updateSelectedType('cafes')" class="type-button" data-type="cafes">Cafes</button>
             <button onclick="updateSelectedType('bakery')" class="type-button" data-type="bakery">Bakery</button>
-            </div>
-        <button onclick="searchEstablishments()" class="search-button">Search</button>
+        </div>
+        <button id="searchButton" onclick="searchEstablishments()" class="search-button">Search</button>
     </div>
     <div class="results-container">
         <div id="results-area" class="loading"> 
-            Enter a city and select a type to search.
+            Enter a city, optional country, and select a type to search.
         </div>
     </div>
     <script>
@@ -224,9 +250,11 @@
         }
 
         async function searchEstablishments() { 
-            const city = document.getElementById('city').value.trim();
-            // NEW: Get country value
-            const country = document.getElementById('country').value.trim();
+            const cityInput = document.getElementById('city');
+            const countryInput = document.getElementById('country');
+            const searchButton = document.getElementById('searchButton'); // Get the search button
+            const city = cityInput.value.trim();
+            const country = countryInput.value.trim();
             const resultsArea = document.getElementById('results-area');
 
             if (!city) {
@@ -235,11 +263,16 @@
             }
 
             resultsArea.innerHTML = '<div class="loading">Searching... This may take a moment.</div>';
+            // Disable inputs and button during search
+            cityInput.disabled = true;
+            countryInput.disabled = true;
+            searchButton.disabled = true;
+            document.querySelectorAll('.type-button').forEach(btn => btn.disabled = true);
+
 
             try {
-                // MODIFIED: Add country to the fetch URL
                 let fetchURL = `/get-restaurants?city=${encodeURIComponent(city)}&type=${selectedType}`;
-                if (country) { // Only add country parameter if it's provided
+                if (country) {
                     fetchURL += `&country=${encodeURIComponent(country)}`;
                 }
                 
@@ -247,53 +280,82 @@
                 const data = await response.json();
                 
                 if (data.error) {
-                    resultsArea.innerHTML = '<div class="error">Error: ' + data.error + '</div>';
+                    // Display specific errors from backend (like city/country mismatch)
+                    resultsArea.innerHTML = `<div class="error">${data.error}</div>`;
                     return;
                 }
 
                 const geminiResultText = data.result || '';
                 
-                if (!geminiResultText || geminiResultText.trim() === "" || (geminiResultText.startsWith("No ") && geminiResultText.includes("found matching the criteria"))) {
-                     resultsArea.innerHTML = `<div class="error">${geminiResultText || 'No results found or an issue with the response.'}</div>`;
+                // Handle Gemini's "No [type] found..." message specifically
+                if (geminiResultText.startsWith("No ") && (geminiResultText.includes("found matching your criteria") || geminiResultText.includes("found matching your criteria in"))) {
+                     resultsArea.innerHTML = `<div class="info-message">${geminiResultText}</div>`; // Use info-message style
+                     return;
+                }
+                if (!geminiResultText || geminiResultText.trim() === "") {
+                     resultsArea.innerHTML = `<div class="info-message">No results found or an issue with the response.</div>`; // Use info-message
                      return;
                 }
 
+
                 const lines = geminiResultText.split('\n').filter(line => line.trim() !== '');
                 let listHtml = '';
-                let advisoryNoteHtml = ''; // Assuming you might re-add this later via Gemini
+                let foundEstablishments = false;
 
-                // This parsing logic is based on Gemini outputting only names
                 lines.forEach(line => {
-                    // Example: "1. Establishment Name"
-                    if (line.match(/^\d+\.\s/)) { 
-                        let namePart = line.substring(line.indexOf('.') + 1).trim();
-                        // If Gemini adds status again, you'd parse it here
-                        listHtml += `<div class="establishment-item"><span class="establishment-name">${namePart}</span></div>`;
-                    } else if (line.trim() !== "" && !line.toLowerCase().startsWith("reminder:")) { 
-                        // Catch-all for other lines, if any, not part of numbered list or advisory
-                        listHtml += `<div class="establishment-item">${line}</div>`; 
+                    // Expected format: "1. Establishment Name - [GF Status]"
+                    const match = line.match(/^\d+\.\s*(.+?)\s*-\s*(\[.+?\])$/);
+                    if (match) {
+                        foundEstablishments = true;
+                        const namePart = match[1].trim();
+                        const statusPart = match[2].trim(); // e.g., "[Dedicated GF]"
+
+                        let statusClass = 'gf-status-unknown'; // Default class
+                        if (statusPart === "[Dedicated GF]") statusClass = 'gf-status-dedicated';
+                        else if (statusPart === "[Offers GF Menu]") statusClass = 'gf-status-options';
+                        else if (statusPart === "[Unclear - Verify Directly]") statusClass = 'gf-status-unclear';
+                        
+                        listHtml += `<div class="establishment-item">
+                                        <span class="establishment-name">${namePart}</span>
+                                        <span class="gf-status ${statusClass}">${statusPart}</span>
+                                     </div>`;
+                    } else if (line.trim() !== "" && !line.toLowerCase().startsWith("reminder:")) {
+                        // If a line doesn't match the expected format but isn't empty, display it as is.
+                        // This helps catch unexpected formatting from Gemini.
+                        // listHtml += `<div class="establishment-item">${line}</div>`; 
+                        console.warn("Unparsed line from Gemini:", line); // Log unparsed lines
                     }
-                    // Logic for advisory note can be re-added if Gemini provides it
-                    // else if (line.toLowerCase().startsWith("reminder:")) {
-                    //     advisoryNoteHtml += `<div class="advisory-note">${line}</div>`;
-                    // }
                 });
                 
-                if (listHtml === "") { 
-                     // Modified error message for clarity
-                    resultsArea.innerHTML = `<div class="error">No matching establishments found in the response.</div>`;
+                if (!foundEstablishments) { 
+                    // If loop finishes and no items were parsed as establishments, but Gemini didn't give a "No results" message.
+                    resultsArea.innerHTML = `<div class="info-message">Could not parse the results. Please try again.</div>`;
                 } else {
+                    // Add the standard advisory note after the list
+                    const advisoryNote = `
+                        <div class="advisory-note">
+                            <strong>Reminder:</strong> Gluten-free status classifications are AI-assisted suggestions. 
+                            Always call establishments directly to confirm their current gluten-free practices, menu, 
+                            cross-contamination protocols, and to discuss your specific dietary needs, 
+                            especially if you have celiac disease or severe sensitivities. Information can change.
+                        </div>`;
                     resultsArea.innerHTML = `
-                        <div class="establishment-list">
+                        <ul class="establishment-list">
                             ${listHtml}
-                        </div>
-                        ${advisoryNoteHtml} 
+                        </ul>
+                        ${advisoryNote} 
                     `;
                 }
 
             } catch (error) {
                 console.error("Search error:", error);
                 resultsArea.innerHTML = '<div class="error">Failed to load results. Please check your connection and try again.</div>';
+            } finally {
+                // Re-enable inputs and button after search completes or fails
+                cityInput.disabled = false;
+                countryInput.disabled = false;
+                searchButton.disabled = false;
+                document.querySelectorAll('.type-button').forEach(btn => btn.disabled = false);
             }
         }
 
