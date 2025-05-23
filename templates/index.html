@@ -7,7 +7,8 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 1200px;
+            width: 90%; /* Uses 90% of the available width */
+            max-width: 1600px; /* But won't go beyond 1600px */
             margin: 0 auto;
             padding: 20px;
             background-color: #f5f5f5;
@@ -38,7 +39,7 @@
             background-color: #2980b9;
         }
         
-        .nav-item.selected { /* This class seems unused for nav items, but keeping it */
+        .nav-item.selected { 
             background-color: #2980b9;
         }
         .app-header {
@@ -114,32 +115,94 @@
         .search-button:hover {
             background-color: #45a049;
         }
-        .type-button.selected:hover { /* To ensure selected button hover is consistent */
+        .type-button.selected:hover { 
             background-color: #45a049; 
         }
         .results-container { 
-            background-color: white;
+            background-color: white; 
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .establishment-list { 
-            margin-top: 0;
-            padding-left: 0; /* Remove default list padding */
-            list-style-type: none; /* Remove default list bullets */
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding-top: 10px;
         }
-        .establishment-item { 
-            padding: 12px 10px;
-            border-bottom: 1px solid #eee;
-            font-size: 16px; 
-            color: #333;
-            line-height: 1.6;
+
+        a.establishment-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            text-decoration: none; 
+            color: inherit; 
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; 
         }
-        .establishment-item:last-child {
-            border-bottom: none;
+
+        a.establishment-card:hover {
+            transform: translateY(-3px); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
         }
+
+        a.establishment-card.non-clickable {
+            cursor: default; 
+        }
+        a.establishment-card.non-clickable:hover {
+            transform: none; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+
+
+        .establishment-card-name { 
+            font-size: 1.25em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .establishment-card-address {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 8px;
+            margin-bottom: 0;
+            line-height: 1.4;
+        }
+        
+        .gf-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85em; 
+            font-weight: 500;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .gf-status-dedicated {
+            color: white; 
+            background-color: #28a745;
+        }
+        .gf-status-options {
+             color: white; 
+             background-color: #007bff;
+        }
+        .gf-status-unclear {
+            color: white; 
+             background-color: #6c757d;
+        }
+         .gf-status-unknown { 
+            color: #212529;
+            background-color: #ffc107;
+        }
+
         .error {
-            color: #d9534f; /* Bootstrap's danger color */
+            color: #d9534f; 
             text-align: center;
             margin: 20px 0;
             font-weight: bold;
@@ -148,8 +211,8 @@
             border: 1px solid #ebccd1;
             border-radius: 4px;
         }
-        .info-message { /* New style for informative messages */
-            color: #31708f; /* Bootstrap's info color */
+        .info-message { 
+            color: #31708f; 
             text-align: center;
             margin: 20px 0;
             padding: 10px;
@@ -163,42 +226,13 @@
             color: #555;
             font-style: italic;
         }
-        .establishment-name {
-            font-weight: bold;
-            color: #2c3e50;
-            margin-right: 8px; /* Space between name and status */
-        }
-        .gf-status {
-            font-style: italic;
-            padding: 2px 6px; /* Add some padding to status tags */
-            border-radius: 4px; /* Rounded corners for tags */
-            font-size: 0.9em; /* Slightly smaller font for status */
-            /* margin-left: 8px; /* Removed as name has margin-right now */
-        }
-        .gf-status-dedicated {
-            color: white; 
-            background-color: #28a745; /* Green */
-            font-weight: bold;
-        }
-        .gf-status-options {
-             color: white; 
-             background-color: #007bff; /* Blue */
-        }
-        .gf-status-unclear {
-            color: white; 
-            background-color: #6c757d; /* Gray */
-        }
-         .gf-status-unknown { /* For fallback */
-            color: white;
-            background-color: #f0ad4e; /* Orange/Warning */
-        }
         .advisory-note {
-            margin-top: 25px; /* Increased margin */
-            padding: 15px; /* Increased padding */
-            background-color: #fff3cd; /* Light yellow */
-            border-left: 5px solid #ffeeba; /* Yellow border */
-            color: #856404; /* Dark yellow text */
-            font-size: 0.95em; /* Slightly larger */
+            margin-top: 25px; 
+            padding: 15px; 
+            background-color: #fff3cd; 
+            border-left: 5px solid #ffeeba; 
+            color: #856404; 
+            font-size: 0.95em; 
             border-radius: 4px;
             line-height: 1.5;
         }
@@ -246,14 +280,13 @@
                 selectedButton.classList.add('selected');
             }
             selectedType = type;
-            console.log("Selected type:", selectedType);
         }
 
         async function searchEstablishments() { 
-            const cityInput = document.getElementById('city');
+            const cityInput = document.getElementById('city'); // User's input city
             const countryInput = document.getElementById('country');
-            const searchButton = document.getElementById('searchButton'); // Get the search button
-            const city = cityInput.value.trim();
+            const searchButton = document.getElementById('searchButton');
+            const city = cityInput.value.trim(); // User's input city
             const country = countryInput.value.trim();
             const resultsArea = document.getElementById('results-area');
 
@@ -263,12 +296,10 @@
             }
 
             resultsArea.innerHTML = '<div class="loading">Searching... This may take a moment.</div>';
-            // Disable inputs and button during search
             cityInput.disabled = true;
             countryInput.disabled = true;
             searchButton.disabled = true;
             document.querySelectorAll('.type-button').forEach(btn => btn.disabled = true);
-
 
             try {
                 let fetchURL = `/get-restaurants?city=${encodeURIComponent(city)}&type=${selectedType}`;
@@ -280,58 +311,89 @@
                 const data = await response.json();
                 
                 if (data.error) {
-                    // Display specific errors from backend (like city/country mismatch)
                     resultsArea.innerHTML = `<div class="error">${data.error}</div>`;
                     return;
                 }
 
                 const geminiResultText = data.result || '';
-                
-                // Handle Gemini's "No [type] found..." message specifically
+                const rawData = data.raw_data; 
+
                 if (geminiResultText.startsWith("No ") && (geminiResultText.includes("found matching your criteria") || geminiResultText.includes("found matching your criteria in"))) {
-                     resultsArea.innerHTML = `<div class="info-message">${geminiResultText}</div>`; // Use info-message style
+                     resultsArea.innerHTML = `<div class="info-message">${geminiResultText}</div>`;
                      return;
                 }
                 if (!geminiResultText || geminiResultText.trim() === "") {
-                     resultsArea.innerHTML = `<div class="info-message">No results found or an issue with the response.</div>`; // Use info-message
+                     resultsArea.innerHTML = `<div class="info-message">No results found or an issue with the response.</div>`;
                      return;
                 }
 
-
                 const lines = geminiResultText.split('\n').filter(line => line.trim() !== '');
-                let listHtml = '';
+                let cardsHtml = '';
                 let foundEstablishments = false;
 
                 lines.forEach(line => {
-                    // Expected format: "1. Establishment Name - [GF Status]"
                     const match = line.match(/^\d+\.\s*(.+?)\s*-\s*(\[.+?\])$/);
                     if (match) {
                         foundEstablishments = true;
                         const namePart = match[1].trim();
-                        const statusPart = match[2].trim(); // e.g., "[Dedicated GF]"
+                        const statusPartOriginal = match[2].trim(); 
 
-                        let statusClass = 'gf-status-unknown'; // Default class
-                        if (statusPart === "[Dedicated GF]") statusClass = 'gf-status-dedicated';
-                        else if (statusPart === "[Offers GF Menu]") statusClass = 'gf-status-options';
-                        else if (statusPart === "[Unclear - Verify Directly]") statusClass = 'gf-status-unclear';
+                        let statusClass = 'gf-status-unknown'; 
+                        let statusText = statusPartOriginal.replace(/\[|\]/g, '').trim();
+
+                        if (statusPartOriginal === "[Dedicated GF]") {
+                            statusClass = 'gf-status-dedicated';
+                            statusText = '✓ ' + statusText; 
+                        } else if (statusPartOriginal === "[Offers GF Menu]") {
+                            statusClass = 'gf-status-options';
+                        } else if (statusPartOriginal === "[Unclear - Verify Directly]") {
+                            statusClass = 'gf-status-unclear';
+                        }
                         
-                        listHtml += `<div class="establishment-item">
-                                        <span class="establishment-name">${namePart}</span>
-                                        <span class="gf-status ${statusClass}">${statusPart}</span>
-                                     </div>`;
+                        let address = 'Address not available';
+                        if (rawData && Array.isArray(rawData)) {
+                            const placeNameFromGemini = namePart.trim();
+                            const foundPlace = rawData.find(place => 
+                                place.name && place.name.trim().toLowerCase() === placeNameFromGemini.toLowerCase()
+                            );
+                            if (foundPlace && foundPlace.address) {
+                                address = foundPlace.address;
+                            }
+                        }
+                        
+                        // *** Construct a more specific Google Search URL ***
+                        let searchQueryComponents = [namePart];
+                        if (address && address !== 'Address not available') {
+                            searchQueryComponents.push(address); // Add the detailed address
+                        } else {
+                            // Fallback: if no specific address, use the city the user searched for
+                            const cityContext = cityInput.value.trim(); // 'city' is defined at the start of this function
+                            if (cityContext) {
+                                searchQueryComponents.push(cityContext);
+                            }
+                        }
+                        const fullSearchQuery = searchQueryComponents.join(' ');
+                        const encodedSearchQuery = encodeURIComponent(fullSearchQuery);
+                        const searchUrl = `http://google.com/search?q=${encodedSearchQuery}`;
+                        
+                        // console.log(`For "${namePart}": Search Query is "${fullSearchQuery}", URL: ${searchUrl}`);
+
+                        cardsHtml += `
+                            <a href="${searchUrl}" 
+                               target="_blank" 
+                               class="establishment-card">
+                                <h3 class="establishment-card-name">${namePart}</h3>
+                                <span class="gf-status ${statusClass}">${statusText}</span>
+                                <p class="establishment-card-address">${address}</p>
+                            </a>`;
                     } else if (line.trim() !== "" && !line.toLowerCase().startsWith("reminder:")) {
-                        // If a line doesn't match the expected format but isn't empty, display it as is.
-                        // This helps catch unexpected formatting from Gemini.
-                        // listHtml += `<div class="establishment-item">${line}</div>`; 
-                        console.warn("Unparsed line from Gemini:", line); // Log unparsed lines
+                        // console.warn("Unparsed line from Gemini:", line); 
                     }
                 });
                 
                 if (!foundEstablishments) { 
-                    // If loop finishes and no items were parsed as establishments, but Gemini didn't give a "No results" message.
-                    resultsArea.innerHTML = `<div class="info-message">Could not parse the results. Please try again.</div>`;
+                    resultsArea.innerHTML = `<div class="info-message">Could not parse the results into the expected format.</div>`;
                 } else {
-                    // Add the standard advisory note after the list
                     const advisoryNote = `
                         <div class="advisory-note">
                             <strong>Reminder:</strong> Gluten-free status classifications are AI-assisted suggestions. 
@@ -340,9 +402,9 @@
                             especially if you have celiac disease or severe sensitivities. Information can change.
                         </div>`;
                     resultsArea.innerHTML = `
-                        <ul class="establishment-list">
-                            ${listHtml}
-                        </ul>
+                        <div class="results-grid">
+                            ${cardsHtml}
+                        </div>
                         ${advisoryNote} 
                     `;
                 }
@@ -351,7 +413,6 @@
                 console.error("Search error:", error);
                 resultsArea.innerHTML = '<div class="error">Failed to load results. Please check your connection and try again.</div>';
             } finally {
-                // Re-enable inputs and button after search completes or fails
                 cityInput.disabled = false;
                 countryInput.disabled = false;
                 searchButton.disabled = false;
