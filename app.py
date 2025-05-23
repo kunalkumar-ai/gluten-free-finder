@@ -182,7 +182,7 @@ def get_establishments_route():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5007))
-    flask_debug_env = os.environ.get('FLASK_DEBUG', 'True') 
+    flask_debug_env = os.environ.get('FLASK_DEBUG', 'False') 
     debug_mode = flask_debug_env.lower() not in ['false', '0', 'no']
     
     print(f"Starting Flask app on http://0.0.0.0:{port}/ with debug mode: {debug_mode}")
